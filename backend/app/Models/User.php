@@ -18,6 +18,11 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function studentProfile()
+{
+    return $this->hasOne(StudentProfile::class);
+}
+
     protected $hidden = [
         'password',
         'remember_token',

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../services/api";
 import { useTheme } from "../context/ThemeContext";
 
@@ -26,13 +27,14 @@ function HomePage() {
         color: isDark ? "#ffffff" : "#08060d",
       }}
     >
-      <div className="w-full max-w-3xl rounded-3xl border p-10 shadow-2xl"
+      <div
+        className="w-full max-w-4xl rounded-3xl border p-10 shadow-2xl"
         style={{
           backgroundColor: isDark ? "#120d1d" : "#ffffff",
           borderColor: isDark ? "#2a203a" : "#ddd",
         }}
       >
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-start justify-between gap-6 mb-8">
           <div>
             <p
               className="text-sm font-medium uppercase tracking-[0.2em]"
@@ -40,14 +42,14 @@ function HomePage() {
             >
               SIWES System
             </p>
-            <h1 className="text-4xl md:text-5xl font-bold mt-2">
+            <h1 className="text-4xl md:text-6xl font-bold mt-2 leading-tight">
               Cloud-Based SIWES Logbook Application
             </h1>
           </div>
 
           <button
             onClick={toggleTheme}
-            className="px-4 py-2 rounded-xl font-semibold transition"
+            className="px-4 py-3 rounded-xl font-semibold transition"
             style={{
               backgroundColor: "#aa3bff",
               color: "#fff",
@@ -58,11 +60,32 @@ function HomePage() {
         </div>
 
         <p
-          className="text-lg mb-4"
+          className="text-lg mb-6"
           style={{ color: isDark ? "#e5e4e7" : "#444" }}
         >
           {message}
         </p>
+
+        <div className="flex flex-wrap gap-4 mb-8">
+          <Link
+            to="/register"
+            className="rounded-xl px-6 py-3 font-semibold"
+            style={{ backgroundColor: "#aa3bff", color: "#fff" }}
+          >
+            Get Started
+          </Link>
+
+          <Link
+            to="/login"
+            className="rounded-xl px-6 py-3 font-semibold border"
+            style={{
+              borderColor: isDark ? "#2a203a" : "#ddd",
+              color: isDark ? "#fff" : "#08060d",
+            }}
+          >
+            Login
+          </Link>
+        </div>
 
         <div className="grid md:grid-cols-3 gap-4 mt-8">
           <div

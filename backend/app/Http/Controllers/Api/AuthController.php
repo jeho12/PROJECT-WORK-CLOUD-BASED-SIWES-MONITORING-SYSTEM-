@@ -30,8 +30,9 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Registration successful',
-            'user' => $user,
+            'user' => $user->load('roles', 'studentProfile'),
             'token' => $token,
+            'profile_complete' => false,
         ], 201);
     }
 
@@ -51,22 +52,29 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user->load('roles', 'studentProfile');
 
         return response()->json([
             'message' => 'Login successful',
             'user' => $user,
             'token' => $token,
+            'profile_complete' => optional($user->studentProfile)->is_complete ?? false,
         ]);
     }
 
     public function me(Request $request)
     {
-        return response()->json($request->user()->load('roles'));
+        $user = $request->user()->load('roles', 'studentProfile');
+
+        return response()->json([
+            ...$user->toArray(),
+            'profile_complete' => optional($user->studentProfile)->is_complete ?? false,
+        ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()?->delete();
 
         return response()->json([
             'message' => 'Logged out successfully',
