@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import AppLayout from "../layouts/AppLayout";
 
 function ProfilePage() {
   const { token, refreshUser } = useAuth();
   const { theme } = useTheme();
-  const navigate = useNavigate();
-
   const isDark = theme === "dark";
 
   const [formData, setFormData] = useState({
@@ -117,12 +115,6 @@ function ProfilePage() {
       setMessage(response.data.message || "Profile saved successfully.");
       setProfileComplete(!!response.data.is_complete);
       await refreshUser();
-
-      if (response.data.is_complete) {
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 800);
-      }
     } catch (err) {
       if (err?.response?.data?.errors) {
         const firstError = Object.values(err.response.data.errors)[0]?.[0];
@@ -150,268 +142,226 @@ function ProfilePage() {
   }
 
   return (
-    <div
-      className="min-h-screen px-6 py-10"
-      style={{
-        backgroundColor: isDark ? "#08060d" : "#f4f3ec",
-        color: isDark ? "#fff" : "#08060d",
-      }}
-    >
-      <div className="max-w-5xl mx-auto">
-        <div
-          className="rounded-3xl border p-8 shadow-2xl"
+    <AppLayout title="Profile" subtitle="Complete Your SIWES Profile">
+      {!profileComplete && (
+        <div className="mb-4 rounded-xl px-4 py-3 bg-yellow-500/20 text-yellow-300 text-sm">
+          Please complete the required fields before accessing the full dashboard.
+        </div>
+      )}
+
+      {message && (
+        <div className="mb-4 rounded-xl px-4 py-3 bg-green-500/20 text-green-300 text-sm">
+          {message}
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-4 rounded-xl px-4 py-3 bg-red-500/20 text-red-300 text-sm">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
+        <input
+          type="text"
+          name="matric_number"
+          placeholder="Matric Number"
+          value={formData.matric_number}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
           style={{
-            backgroundColor: isDark ? "#120d1d" : "#fff",
-            borderColor: isDark ? "#2a203a" : "#ddd",
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+          required
+        />
+
+        <input
+          type="text"
+          name="department"
+          placeholder="Department"
+          value={formData.department}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+          required
+        />
+
+        <input
+          type="text"
+          name="faculty"
+          placeholder="Faculty"
+          value={formData.faculty}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+          required
+        />
+
+        <input
+          type="text"
+          name="level"
+          placeholder="Level"
+          value={formData.level}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+          required
+        />
+
+        <input
+          type="email"
+          name="school_email"
+          placeholder="School Email"
+          value={formData.school_email}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+          required
+        />
+
+        <div
+          className="rounded-xl px-4 py-3"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
           }}
         >
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div>
-              <p
-                className="uppercase tracking-[0.2em] text-sm font-semibold mb-2"
-                style={{ color: "#aa3bff" }}
-              >
-                Student Profile
-              </p>
-              <h1 className="text-4xl font-bold">Complete Your SIWES Profile</h1>
-              <p className="opacity-80 mt-2">
-                Fill in your academic and industrial training details.
-              </p>
-            </div>
-
-            <Link
-              to="/dashboard"
-              className="rounded-xl px-4 py-3 font-semibold"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#e5e4e7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-            >
-              Back to Dashboard
-            </Link>
-          </div>
-
-          {!profileComplete && (
-            <div className="mb-4 rounded-xl px-4 py-3 bg-yellow-500/20 text-yellow-300 text-sm">
-              Please complete the required fields before accessing the full dashboard.
-            </div>
-          )}
-
-          {message && (
-            <div className="mb-4 rounded-xl px-4 py-3 bg-green-500/20 text-green-300 text-sm">
-              {message}
-            </div>
-          )}
-
-          {error && (
-            <div className="mb-4 rounded-xl px-4 py-3 bg-red-500/20 text-red-300 text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="matric_number"
-              placeholder="Matric Number"
-              value={formData.matric_number}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-              required
-            />
-
-            <input
-              type="text"
-              name="department"
-              placeholder="Department"
-              value={formData.department}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-              required
-            />
-
-            <input
-              type="text"
-              name="faculty"
-              placeholder="Faculty"
-              value={formData.faculty}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-              required
-            />
-
-            <input
-              type="text"
-              name="level"
-              placeholder="Level"
-              value={formData.level}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-              required
-            />
-
-            <input
-              type="email"
-              name="school_email"
-              placeholder="School Email"
-              value={formData.school_email}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-              required
-            />
-
-            <div
-              className="rounded-xl px-4 py-3"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-              }}
-            >
-              <label className="block text-sm mb-2 opacity-80">Passport Upload</label>
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png"
-                onChange={handlePassportChange}
-                className="w-full text-sm"
-              />
-            </div>
-
-            {passportPreview && (
-              <div className="md:col-span-2">
-                <img
-                  src={passportPreview}
-                  alt="Passport Preview"
-                  className="w-28 h-28 object-cover rounded-2xl border"
-                  style={{ borderColor: isDark ? "#2a203a" : "#ddd" }}
-                />
-              </div>
-            )}
-
-            <input
-              type="text"
-              name="organization_name"
-              placeholder="SIWES Organization Name"
-              value={formData.organization_name}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-            />
-
-            <input
-              type="text"
-              name="organization_address"
-              placeholder="Organization Address"
-              value={formData.organization_address}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-            />
-
-            <input
-              type="text"
-              name="industry_supervisor_name"
-              placeholder="Industry Supervisor Name"
-              value={formData.industry_supervisor_name}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-            />
-
-            <input
-              type="email"
-              name="industry_supervisor_email"
-              placeholder="Industry Supervisor Email"
-              value={formData.industry_supervisor_email}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-            />
-
-            <input
-              type="text"
-              name="industry_supervisor_phone"
-              placeholder="Industry Supervisor Phone"
-              value={formData.industry_supervisor_phone}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-            />
-
-            <input
-              type="date"
-              name="training_start_date"
-              value={formData.training_start_date}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-            />
-
-            <input
-              type="date"
-              name="training_end_date"
-              value={formData.training_end_date}
-              onChange={handleChange}
-              className="rounded-xl px-4 py-3 outline-none"
-              style={{
-                backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
-                color: isDark ? "#fff" : "#08060d",
-              }}
-            />
-
-            <div className="md:col-span-2 pt-2">
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-xl px-6 py-3 font-semibold"
-                style={{
-                  backgroundColor: "#aa3bff",
-                  color: "#fff",
-                }}
-              >
-                {saving ? "Saving..." : "Save Profile"}
-              </button>
-            </div>
-          </form>
+          <label className="block text-sm mb-2 opacity-80">Passport Upload</label>
+          <input
+            type="file"
+            accept=".jpg,.jpeg,.png"
+            onChange={handlePassportChange}
+            className="w-full text-sm"
+          />
         </div>
-      </div>
-    </div>
+
+        {passportPreview && (
+          <div className="md:col-span-2">
+            <img
+              src={passportPreview}
+              alt="Passport Preview"
+              className="w-28 h-28 object-cover rounded-2xl border"
+              style={{ borderColor: isDark ? "#2a203a" : "#ddd" }}
+            />
+          </div>
+        )}
+
+        <input
+          type="text"
+          name="organization_name"
+          placeholder="SIWES Organization Name"
+          value={formData.organization_name}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+        />
+
+        <input
+          type="text"
+          name="organization_address"
+          placeholder="Organization Address"
+          value={formData.organization_address}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+        />
+
+        <input
+          type="text"
+          name="industry_supervisor_name"
+          placeholder="Industry Supervisor Name"
+          value={formData.industry_supervisor_name}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+        />
+
+        <input
+          type="email"
+          name="industry_supervisor_email"
+          placeholder="Industry Supervisor Email"
+          value={formData.industry_supervisor_email}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+        />
+
+        <input
+          type="text"
+          name="industry_supervisor_phone"
+          placeholder="Industry Supervisor Phone"
+          value={formData.industry_supervisor_phone}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+        />
+
+        <input
+          type="date"
+          name="training_start_date"
+          value={formData.training_start_date}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+        />
+
+        <input
+          type="date"
+          name="training_end_date"
+          value={formData.training_end_date}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+        />
+
+        <div className="md:col-span-2 pt-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-xl px-6 py-3 font-semibold"
+            style={{
+              backgroundColor: "#aa3bff",
+              color: "#fff",
+            }}
+          >
+            {saving ? "Saving..." : "Save Profile"}
+          </button>
+        </div>
+      </form>
+    </AppLayout>
   );
 }
 

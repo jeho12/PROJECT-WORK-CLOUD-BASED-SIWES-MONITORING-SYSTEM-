@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\StudentProfile;
+use App\Models\LogbookWeek;
 
 class User extends Authenticatable
 {
@@ -21,6 +23,16 @@ class User extends Authenticatable
     public function studentProfile()
 {
     return $this->hasOne(StudentProfile::class);
+}
+
+public function logbookWeeks()
+{
+    return $this->hasMany(LogbookWeek::class);
+}
+
+public function attendanceLogs()
+{
+    return $this->hasMany(AttendanceLog::class);
 }
 
     protected $hidden = [

@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function ProfileCompletionRoute({ children }) {
-  const { loading, user, isAuthenticated } = useAuth();
+  const { loading, user, isAuthenticated, profileComplete } = useAuth();
 
   if (loading) {
     return (
@@ -16,7 +16,16 @@ function ProfileCompletionRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user && !user.profile_complete) {
+  // Wait until user object is actually loaded before checking
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!profileComplete) {
     return <Navigate to="/profile" replace />;
   }
 

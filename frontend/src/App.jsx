@@ -6,6 +6,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import ProfileCompletionRoute from "./routes/ProfileCompletionRoute";
+import LogbookPage from "./pages/LogbookPage";
 
 function App() {
   return (
@@ -32,6 +33,15 @@ function App() {
             </ProfileCompletionRoute>
           }
         />
+
+        <Route
+  path="/logbook"
+  element={
+    <ProfileCompletionRoute>
+      <LogbookPage />
+    </ProfileCompletionRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );
