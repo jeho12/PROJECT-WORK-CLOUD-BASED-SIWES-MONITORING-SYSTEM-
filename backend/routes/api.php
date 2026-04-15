@@ -8,6 +8,10 @@ use App\Http\Controllers\Api\LogbookAttachmentController;
 use App\Http\Controllers\Api\LogbookController;
 use App\Http\Controllers\Api\StudentProfileController;
 use App\Http\Controllers\Api\SupervisorController;
+use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AIReviewController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +65,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [StudentProfileController::class, 'storeOrUpdate']);
     });
 
+     /*
+    |--------------------------------------------------------------------------
+    | Admin
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('admin')->group(function () {
+    Route::post('/supervisors', [AdminController::class, 'createSupervisor']);
+    Route::get('/students', [AdminController::class, 'students']);
+    Route::get('/supervisors', [AdminController::class, 'supervisors']);
+    Route::post('/assign-supervisor', [AdminController::class, 'assignSupervisor']);
+});
+
+  /*
+|--------------------------------------------------------------------------
+| AI
+|--------------------------------------------------------------------------
+*/
+Route::post('/ai-review/{studentId}', [AIReviewController::class, 'generate']);
+Route::get('/ai-review/{studentId}', [AIReviewController::class, 'show']);
+
     /*
     |--------------------------------------------------------------------------
     | Attendance
@@ -95,9 +119,10 @@ Route::middleware('auth:sanctum')->group(function () {
     | Supervisor
     |--------------------------------------------------------------------------
     */
-    Route::prefix('supervisor')->group(function () {
-        Route::get('/dashboard', [SupervisorController::class, 'dashboard']);
-        Route::get('/week/{weekId}', [SupervisorController::class, 'submittedWeekDetails']);
-        Route::post('/week/{weekId}/review', [SupervisorController::class, 'reviewWeek']);
-    });
+   Route::prefix('supervisor')->group(function () {
+    Route::get('/dashboard', [SupervisorController::class, 'dashboard']);
+    Route::get('/student/{studentId}/weeks', [SupervisorController::class, 'studentWeeks']);
+    Route::get('/week/{weekId}', [SupervisorController::class, 'submittedWeekDetails']);
+    Route::post('/week/{weekId}/review', [SupervisorController::class, 'reviewWeek']);
+});
 });

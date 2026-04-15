@@ -4,13 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\LogbookWeek;
-use App\Models\WeeklyReport;
 use Illuminate\Http\Request;
 
 class SupervisorController extends Controller
 {
     public function dashboard(Request $request)
     {
+        if (!$request->user()->hasRole('supervisor')) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
         $supervisor = $request->user();
 
         $students = $supervisor->supervisedStudents()
@@ -20,9 +25,12 @@ class SupervisorController extends Controller
         $submittedWeeks = LogbookWeek::whereHas('user.studentProfile', function ($query) use ($supervisor) {
                 $query->where('supervisor_id', $supervisor->id);
             })
-            ->where('status', 'submitted')
-            ->with(['user.studentProfile', 'weeklyReport'])
-            ->latest()
+            ->whereIn('status', ['submitted', 'approved', 'rejected'])
+            ->with([
+                'user.studentProfile',
+                'weeklyReport',
+            ])
+            ->latest('week_start_date')
             ->get();
 
         return response()->json([
@@ -31,8 +39,41 @@ class SupervisorController extends Controller
         ]);
     }
 
+    public function studentWeeks(Request $request, $studentId)
+    {
+        if (!$request->user()->hasRole('supervisor')) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        $supervisor = $request->user();
+
+        $weeks = LogbookWeek::where('user_id', $studentId)
+            ->whereHas('user.studentProfile', function ($query) use ($supervisor) {
+                $query->where('supervisor_id', $supervisor->id);
+            })
+            ->with([
+                'weeklyReport',
+                'days.attachments',
+                'days.attendanceLog',
+            ])
+            ->latest('week_start_date')
+            ->get();
+
+        return response()->json([
+            'weeks' => $weeks,
+        ]);
+    }
+
     public function submittedWeekDetails(Request $request, $weekId)
     {
+        if (!$request->user()->hasRole('supervisor')) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
         $supervisor = $request->user();
 
         $week = LogbookWeek::where('id', $weekId)
@@ -42,6 +83,7 @@ class SupervisorController extends Controller
             ->with([
                 'user.studentProfile',
                 'days.attachments',
+                'days.attendanceLog',
                 'weeklyReport',
             ])
             ->firstOrFail();
@@ -53,6 +95,12 @@ class SupervisorController extends Controller
 
     public function reviewWeek(Request $request, $weekId)
     {
+        if (!$request->user()->hasRole('supervisor')) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
         $supervisor = $request->user();
 
         $validated = $request->validate([
@@ -85,14 +133,19 @@ class SupervisorController extends Controller
         ]);
 
         $week->update([
-            'status' => $validated['review_status'] === 'approved' ? 'approved' : 'rejected',
+            'status' => $validated['review_status'],
         ]);
 
-        return response()->json([
-            'message' => $validated['review_status'] === 'approved'
-                ? 'Weekly report approved successfully.'
-                : 'Weekly report rejected successfully.',
-            'week' => $week->fresh('weeklyReport'),
-        ]);
+       return response()->json([
+    'message' => $validated['review_status'] === 'approved'
+        ? 'Weekly report approved successfully.'
+        : 'Weekly report rejected successfully.',
+    'week' => $week->fresh([
+        'user.studentProfile',
+        'days.attachments',
+        'days.attendanceLog',
+        'weeklyReport',
+    ]),
+]);
     }
 }

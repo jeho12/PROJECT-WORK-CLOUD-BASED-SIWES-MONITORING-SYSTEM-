@@ -7,6 +7,10 @@ import ProfilePage from "./pages/ProfilePage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import ProfileCompletionRoute from "./routes/ProfileCompletionRoute";
 import LogbookPage from "./pages/LogbookPage";
+import RoleRoute from "./routes/RoleRoute";
+import SupervisorDashboardPage from "./pages/SupervisorDashboardPage";
+import SupervisorWeekReviewPage from "./pages/SupervisorWeekReviewPage";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   return (
@@ -42,6 +46,35 @@ function App() {
     </ProfileCompletionRoute>
   }
 />
+
+
+<Route
+  path="/supervisor/dashboard"
+  element={
+    <RoleRoute role="supervisor">
+      <SupervisorDashboardPage />
+    </RoleRoute>
+  }
+/>
+
+<Route
+  path="/supervisor/week/:weekId"
+  element={
+    <RoleRoute role="supervisor">
+      <SupervisorWeekReviewPage />
+    </RoleRoute>
+  }
+/>
+
+<Route
+  path="/admin"
+  element={
+    <RoleRoute role="admin">
+      <AdminPage />
+    </RoleRoute>
+  }
+/>
+
       </Routes>
     </BrowserRouter>
   );

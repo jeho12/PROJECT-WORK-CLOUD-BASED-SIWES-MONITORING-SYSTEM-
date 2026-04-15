@@ -9,22 +9,23 @@ class StudentProfile extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'matric_number',
-        'department',
-        'faculty',
-        'level',
-        'school_email',
-        'organization_name',
-        'organization_address',
-        'industry_supervisor_name',
-        'industry_supervisor_email',
-        'industry_supervisor_phone',
-        'training_start_date',
-        'training_end_date',
-        'passport_path',
-    ];
+   protected $fillable = [
+    'user_id',
+    'supervisor_id',
+    'matric_number',
+    'department',
+    'faculty',
+    'level',
+    'school_email',
+    'organization_name',
+    'organization_address',
+    'industry_supervisor_name',
+    'industry_supervisor_email',
+    'industry_supervisor_phone',
+    'training_start_date',
+    'training_end_date',
+    'passport_path',
+];
 
     protected $appends = ['is_complete', 'passport_url'];
 
