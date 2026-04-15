@@ -11,6 +11,7 @@ import RoleRoute from "./routes/RoleRoute";
 import SupervisorDashboardPage from "./pages/SupervisorDashboardPage";
 import SupervisorWeekReviewPage from "./pages/SupervisorWeekReviewPage";
 import AdminPage from "./pages/AdminPage";
+import StudentOnlyRoute from "./routes/StudentOnlyRoute";
 
 function App() {
   return (
@@ -24,7 +25,9 @@ function App() {
           path="/profile"
           element={
             <ProtectedRoute>
+               <StudentOnlyRoute>
               <ProfilePage />
+              </StudentOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -33,7 +36,9 @@ function App() {
           path="/dashboard"
           element={
             <ProfileCompletionRoute>
+               <StudentOnlyRoute>
               <DashboardPage />
+              </StudentOnlyRoute>
             </ProfileCompletionRoute>
           }
         />

@@ -25,6 +25,20 @@ function LoginPage() {
     }));
   };
 
+  const getRedirectPath = (user, profileComplete) => {
+    const roles = user?.roles?.map((role) => role.name || role) || [];
+
+    if (roles.includes("admin")) {
+      return "/admin";
+    }
+
+    if (roles.includes("supervisor")) {
+      return "/supervisor/dashboard";
+    }
+
+    return profileComplete ? "/dashboard" : "/profile";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -32,10 +46,12 @@ function LoginPage() {
 
     try {
       const data = await login(formData);
+
+      const user = data.user;
       const profileComplete =
         data.profile_complete ?? data.user?.profile_complete ?? false;
 
-      navigate(profileComplete ? "/dashboard" : "/profile");
+      navigate(getRedirectPath(user, profileComplete));
     } catch (err) {
       setError(
         err?.response?.data?.message ||
