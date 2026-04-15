@@ -238,53 +238,140 @@ function SupervisorDashboardPage() {
     }
   };
 
-  const handleExportAIReview = () => {
-    if (!selectedReview) return;
+ const handleExportAIReview = () => {
+  if (!selectedReview) return;
 
-    const printWindow = window.open("", "_blank", "width=900,height=700");
-    if (!printWindow) return;
+  const printWindow = window.open("", "_blank", "width=900,height=700");
+  if (!printWindow) return;
 
-    const content = `
-      <html>
-        <head>
-          <title>AI Review Export</title>
-          <style>
+  const summary = selectedReview.summary || "No summary available.";
+
+  const content = `
+    <html>
+      <head>
+        <title>AI_Review_${selectedReview.student_id}_${selectedReview.month}_${selectedReview.year}</title>
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 40px;
+            line-height: 1.7;
+            color: #111827;
+            background: #ffffff;
+          }
+
+          .header {
+            border-bottom: 2px solid #7c3aed;
+            padding-bottom: 16px;
+            margin-bottom: 28px;
+          }
+
+          .brand {
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #7c3aed;
+            font-weight: 700;
+            margin-bottom: 8px;
+          }
+
+          h1 {
+            margin: 0;
+            font-size: 30px;
+            color: #111827;
+          }
+
+          .meta {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #4b5563;
+          }
+
+          .section {
+            margin-bottom: 24px;
+          }
+
+          .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #111827;
+          }
+
+          .card {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            background: #fafafa;
+          }
+
+          .label {
+            font-weight: 700;
+            color: #111827;
+          }
+
+          .summary {
+            white-space: pre-wrap;
+            font-size: 15px;
+            color: #1f2937;
+          }
+
+          .footer {
+            margin-top: 40px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 12px;
+            color: #6b7280;
+          }
+
+          @media print {
             body {
-              font-family: Arial, sans-serif;
-              padding: 32px;
-              line-height: 1.6;
-              color: #111;
+              padding: 20px;
             }
-            h1, h2 {
-              margin-bottom: 12px;
-            }
-            .section {
-              margin-bottom: 20px;
-            }
-            .label {
-              font-weight: bold;
-            }
-          </style>
-        </head>
-        <body>
-          <h1>Monthly AI Review</h1>
-          <div class="section"><span class="label">Student ID:</span> ${selectedReview.student_id}</div>
-          <div class="section"><span class="label">Month:</span> ${selectedReview.month}</div>
-          <div class="section"><span class="label">Year:</span> ${selectedReview.year}</div>
-          <div class="section">
-            <h2>Summary</h2>
-            <div>${(selectedReview.summary || "").replace(/\n/g, "<br/>")}</div>
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="brand">SIWES System</div>
+          <h1>Monthly AI Review Report</h1>
+          <div class="meta">
+            Student ID: ${selectedReview.student_id}<br />
+            Month: ${selectedReview.month}<br />
+            Year: ${selectedReview.year}<br />
+            Generated At: ${selectedReview.created_at || ""}
           </div>
-        </body>
-      </html>
-    `;
+        </div>
 
-    printWindow.document.open();
-    printWindow.document.write(content);
-    printWindow.document.close();
+        <div class="section">
+          <div class="section-title">AI Evaluation Summary</div>
+          <div class="card">
+            <div class="summary">${summary
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")}</div>
+          </div>
+        </div>
+
+        <div class="footer">
+          This document was generated from the Cloud-Based SIWES Logbook Application.
+        </div>
+      </body>
+    </html>
+  `;
+
+  printWindow.document.open();
+  printWindow.document.write(content);
+  printWindow.document.close();
+
+  printWindow.onload = () => {
     printWindow.focus();
     printWindow.print();
   };
+};
 
   if (loading) {
     return (
