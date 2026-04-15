@@ -17,11 +17,11 @@ class LogbookController extends Controller
         $today = Carbon::today();
         $dayName = strtolower($today->format('l'));
 
-        $allowedDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+       $allowedDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
 
         if (!in_array($dayName, $allowedDays)) {
             return response()->json([
-                'message' => 'Logbook entries are only available from Monday to Saturday.',
+                'message' => 'You can only submit logbook entries from Monday to Friday.',
                 'today' => $today->toDateString(),
                 'day_name' => $dayName,
                 'can_submit' => false,
@@ -64,11 +64,11 @@ class LogbookController extends Controller
         $dayName = strtolower($today->format('l'));
         $now = Carbon::now();
 
-        $allowedDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+       $allowedDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
 
         if (!in_array($dayName, $allowedDays)) {
             return response()->json([
-                'message' => 'You can only submit logbook entries from Monday to Saturday.',
+                'message' => 'Logbook entries are only available from Monday to Friday.',
             ], 422);
         }
 
@@ -130,7 +130,7 @@ class LogbookController extends Controller
 
         $daysCount = LogbookDay::where('logbook_week_id', $week->id)->count();
 
-        if ($daysCount >= 6 && $week->status === 'ongoing') {
+        if ($daysCount >= 5 && $week->status === 'ongoing') {
             $week->update(['status' => 'completed']);
         }
 
@@ -153,7 +153,7 @@ class LogbookController extends Controller
         return response()->json([
             'week' => $week,
             'report' => $week->weeklyReport,
-            'can_submit_weekly_report' => $week->days()->count() >= 6,
+           'can_submit_weekly_report' => $week->days()->count() >= 5,
         ]);
     }
 
@@ -165,9 +165,9 @@ class LogbookController extends Controller
             ->where('user_id', $user->id)
             ->firstOrFail();
 
-        if ($week->days()->count() < 6) {
+        if ($week->days()->count() < 5) {
             return response()->json([
-                'message' => 'Complete all daily entries before saving weekly report.',
+                'message' => 'Complete all required daily entries from Monday to Friday before saving weekly report.',
             ], 422);
         }
 
@@ -204,9 +204,9 @@ class LogbookController extends Controller
             ->with('days', 'weeklyReport')
             ->firstOrFail();
 
-        if ($week->days()->count() < 6) {
+        if ($week->days()->count() < 5) {
             return response()->json([
-                'message' => 'You must complete all Monday to Saturday entries before submission.',
+                'message' => 'You must complete all Monday to Friday entries before submission.',
             ], 422);
         }
 

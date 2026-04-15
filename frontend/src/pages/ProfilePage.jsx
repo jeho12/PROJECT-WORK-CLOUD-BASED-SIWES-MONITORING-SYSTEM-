@@ -36,6 +36,9 @@ function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        setError("");
+        setMessage("");
+
         const response = await api.get("/student-profile", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -63,14 +66,20 @@ function ProfilePage() {
           setPassportPreview(profile.passport_url || "");
           setProfileComplete(!!response.data.is_complete);
         }
-      } catch {
-        setError("Could not load profile.");
+
+        setError("");
+      } catch (err) {
+        setError(
+          err?.response?.data?.message || "Could not load profile."
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    if (token) {
+      fetchProfile();
+    }
   }, [token]);
 
   const handleChange = (e) => {
@@ -114,6 +123,7 @@ function ProfilePage() {
 
       setMessage(response.data.message || "Profile saved successfully.");
       setProfileComplete(!!response.data.is_complete);
+      setError("");
       await refreshUser();
     } catch (err) {
       if (err?.response?.data?.errors) {

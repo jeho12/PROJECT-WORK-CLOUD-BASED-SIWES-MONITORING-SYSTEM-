@@ -9,19 +9,21 @@ class AttendanceLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'logbook_day_id',
-        'date',
-        'check_in_time',
-        'check_out_time',
-        'check_in_latitude',
-        'check_in_longitude',
-        'check_out_latitude',
-        'check_out_longitude',
-        'ip_address',
-        'device_info',
-    ];
+   protected $fillable = [
+    'user_id',
+    'logbook_day_id',
+    'date',
+    'check_in_time',
+    'check_out_time',
+    'check_in_latitude',
+    'check_in_longitude',
+    'check_in_address',
+    'check_out_latitude',
+    'check_out_longitude',
+    'check_out_address',
+    'ip_address',
+    'device_info',
+];
 
     protected $casts = [
         'date' => 'date',

@@ -17,6 +17,9 @@ return new class extends Migration
             $table->time('check_in_time')->nullable();
             $table->time('check_out_time')->nullable();
 
+            $table->text('check_in_address')->nullable();
+            $table->text('check_out_address')->nullable();
+
             $table->decimal('check_in_latitude', 10, 7)->nullable();
             $table->decimal('check_in_longitude', 10, 7)->nullable();
             $table->decimal('check_out_latitude', 10, 7)->nullable();

@@ -16,14 +16,14 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const response = await api.get("/me", {
+        const response = await api.get("/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         setUser(response.data);
-      } catch {
+      } catch (error) {
         localStorage.removeItem("token");
         setToken(null);
         setUser(null);
@@ -36,23 +36,29 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   const register = async (formData) => {
-    const response = await api.post("/register", formData);
+    const response = await api.post("/auth/register", formData);
     const newToken = response.data.token;
 
     localStorage.setItem("token", newToken);
     setToken(newToken);
-    setUser(response.data.user);
+    setUser({
+      ...response.data.user,
+      profile_complete: response.data.profile_complete,
+    });
 
     return response.data;
   };
 
   const login = async (formData) => {
-    const response = await api.post("/login", formData);
+    const response = await api.post("/auth/login", formData);
     const newToken = response.data.token;
 
     localStorage.setItem("token", newToken);
     setToken(newToken);
-    setUser(response.data.user);
+    setUser({
+      ...response.data.user,
+      profile_complete: response.data.profile_complete,
+    });
 
     return response.data;
   };
@@ -60,7 +66,7 @@ export function AuthProvider({ children }) {
   const refreshUser = async () => {
     if (!token) return null;
 
-    const response = await api.get("/me", {
+    const response = await api.get("/auth/me", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -74,7 +80,7 @@ export function AuthProvider({ children }) {
     try {
       if (token) {
         await api.post(
-          "/logout",
+          "/auth/logout",
           {},
           {
             headers: {
@@ -83,8 +89,8 @@ export function AuthProvider({ children }) {
           }
         );
       }
-    } catch {
-      // ignore
+    } catch (error) {
+      // ignore logout API failure
     } finally {
       localStorage.removeItem("token");
       setToken(null);

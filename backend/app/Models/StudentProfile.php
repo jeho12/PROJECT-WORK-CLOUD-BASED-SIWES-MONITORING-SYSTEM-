@@ -33,6 +33,11 @@ class StudentProfile extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function supervisor()
+{
+    return $this->belongsTo(User::class, 'supervisor_id');
+}
+
     public function getIsCompleteAttribute()
     {
         return !empty($this->matric_number)

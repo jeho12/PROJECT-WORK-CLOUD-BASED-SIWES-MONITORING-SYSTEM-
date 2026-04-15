@@ -26,22 +26,25 @@ function LoginPage() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    const data = await login(formData);
-    navigate(data.profile_complete ? "/dashboard" : "/profile");
-  } catch (err) {
-    setError(
-      err?.response?.data?.message ||
-        "Login failed. Please check your credentials."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const data = await login(formData);
+      const profileComplete =
+        data.profile_complete ?? data.user?.profile_complete ?? false;
+
+      navigate(profileComplete ? "/dashboard" : "/profile");
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          "Login failed. Please check your credentials."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div

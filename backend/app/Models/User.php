@@ -30,6 +30,11 @@ public function logbookWeeks()
     return $this->hasMany(LogbookWeek::class);
 }
 
+public function supervisedStudents()
+{
+    return $this->hasMany(StudentProfile::class, 'supervisor_id');
+}
+
 public function attendanceLogs()
 {
     return $this->hasMany(AttendanceLog::class);

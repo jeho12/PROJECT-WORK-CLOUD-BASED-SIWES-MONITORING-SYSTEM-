@@ -15,6 +15,8 @@ class WeeklyReport extends Model
         'section_department',
         'student_comment',
         'work_done',
+        'review_status',
+        'reviewed_by',
         'supervisor_comment',
         'supervisor_name',
         'supervisor_rank',
@@ -28,5 +30,10 @@ class WeeklyReport extends Model
     public function logbookWeek()
     {
         return $this->belongsTo(LogbookWeek::class);
+    }
+
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

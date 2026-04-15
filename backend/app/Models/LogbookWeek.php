@@ -40,6 +40,6 @@ class LogbookWeek extends Model
 
     public function getIsCompleteAttribute()
     {
-        return $this->days()->count() >= 6;
+        return $this->days()->count() >= 5;
     }
 }
