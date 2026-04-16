@@ -76,7 +76,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/supervisors', [AdminController::class, 'supervisors']);
     Route::post('/assign-supervisor', [AdminController::class, 'assignSupervisor']);
 });
-
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard']);
+    Route::post('/supervisors', [AdminController::class, 'createSupervisor']);
+    Route::get('/students', [AdminController::class, 'students']);
+    Route::get('/supervisors', [AdminController::class, 'supervisors']);
+    Route::post('/assign-supervisor', [AdminController::class, 'assignSupervisor']);
+});
   /*
 |--------------------------------------------------------------------------
 | AI

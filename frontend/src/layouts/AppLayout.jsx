@@ -15,17 +15,17 @@ function AppLayout({ title, subtitle, children }) {
     navigate("/login");
   };
 
-const roles = user?.roles?.map((role) => role.name) || [];
+  const roles = user?.roles?.map((role) => role.name || role) || [];
 
-const navItems = roles.includes("supervisor")
-  ? [
-      { name: "Supervisor Dashboard", path: "/supervisor/dashboard" },
-    ]
-  : [
-      { name: "Dashboard", path: "/dashboard" },
-      { name: "Profile", path: "/profile" },
-      { name: "Logbook", path: "/logbook" },
-    ];
+  const navItems = roles.includes("admin")
+    ? [{ name: "Admin Panel", path: "/admin" }]
+    : roles.includes("supervisor")
+    ? [{ name: "Supervisor Dashboard", path: "/supervisor/dashboard" }]
+    : [
+        { name: "Dashboard", path: "/dashboard" },
+        { name: "Profile", path: "/profile" },
+        { name: "Logbook", path: "/logbook" },
+      ];
 
   return (
     <div

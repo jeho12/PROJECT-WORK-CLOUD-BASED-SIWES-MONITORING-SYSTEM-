@@ -25,8 +25,8 @@ function App() {
           path="/profile"
           element={
             <ProtectedRoute>
-               <StudentOnlyRoute>
-              <ProfilePage />
+              <StudentOnlyRoute>
+                <ProfilePage />
               </StudentOnlyRoute>
             </ProtectedRoute>
           }
@@ -36,50 +36,50 @@ function App() {
           path="/dashboard"
           element={
             <ProfileCompletionRoute>
-               <StudentOnlyRoute>
-              <DashboardPage />
+              <StudentOnlyRoute>
+                <DashboardPage />
               </StudentOnlyRoute>
             </ProfileCompletionRoute>
           }
         />
 
         <Route
-  path="/logbook"
-  element={
-    <ProfileCompletionRoute>
-      <LogbookPage />
-    </ProfileCompletionRoute>
-  }
-/>
+          path="/logbook"
+          element={
+            <ProfileCompletionRoute>
+              <StudentOnlyRoute>
+                <LogbookPage />
+              </StudentOnlyRoute>
+            </ProfileCompletionRoute>
+          }
+        />
 
+        <Route
+          path="/supervisor/dashboard"
+          element={
+            <RoleRoute role="supervisor">
+              <SupervisorDashboardPage />
+            </RoleRoute>
+          }
+        />
 
-<Route
-  path="/supervisor/dashboard"
-  element={
-    <RoleRoute role="supervisor">
-      <SupervisorDashboardPage />
-    </RoleRoute>
-  }
-/>
+        <Route
+          path="/supervisor/week/:weekId"
+          element={
+            <RoleRoute role="supervisor">
+              <SupervisorWeekReviewPage />
+            </RoleRoute>
+          }
+        />
 
-<Route
-  path="/supervisor/week/:weekId"
-  element={
-    <RoleRoute role="supervisor">
-      <SupervisorWeekReviewPage />
-    </RoleRoute>
-  }
-/>
-
-<Route
-  path="/admin"
-  element={
-    <RoleRoute role="admin">
-      <AdminPage />
-    </RoleRoute>
-  }
-/>
-
+        <Route
+          path="/admin"
+          element={
+            <RoleRoute role="admin">
+              <AdminPage />
+            </RoleRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
