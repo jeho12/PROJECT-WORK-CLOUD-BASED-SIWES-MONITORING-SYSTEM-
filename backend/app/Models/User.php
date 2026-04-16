@@ -9,6 +9,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\StudentProfile;
 use App\Models\LogbookWeek;
+use App\Models\AttendanceLog;
 
 class User extends Authenticatable
 {
@@ -18,27 +19,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_active',
     ];
-
-    public function studentProfile()
-{
-    return $this->hasOne(StudentProfile::class);
-}
-
-public function logbookWeeks()
-{
-    return $this->hasMany(LogbookWeek::class);
-}
-
-public function supervisedStudents()
-{
-    return $this->hasMany(StudentProfile::class, 'supervisor_id');
-}
-
-public function attendanceLogs()
-{
-    return $this->hasMany(AttendanceLog::class);
-}
 
     protected $hidden = [
         'password',
@@ -50,6 +32,27 @@ public function attendanceLogs()
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function studentProfile()
+    {
+        return $this->hasOne(StudentProfile::class);
+    }
+
+    public function logbookWeeks()
+    {
+        return $this->hasMany(LogbookWeek::class);
+    }
+
+    public function supervisedStudents()
+    {
+        return $this->hasMany(StudentProfile::class, 'supervisor_id');
+    }
+
+    public function attendanceLogs()
+    {
+        return $this->hasMany(AttendanceLog::class);
     }
 }

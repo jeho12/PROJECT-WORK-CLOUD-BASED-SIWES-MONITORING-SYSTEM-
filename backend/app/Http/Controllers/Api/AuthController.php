@@ -22,6 +22,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
+            'is_active' => true,
         ]);
 
         $user->assignRole('student');
@@ -49,6 +50,12 @@ class AuthController extends Controller
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
+        }
+
+        if (!$user->is_active) {
+            return response()->json([
+                'message' => 'Your account has been deactivated. Please contact the administrator.',
+            ], 403);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

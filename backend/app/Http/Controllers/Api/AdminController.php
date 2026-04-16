@@ -7,6 +7,7 @@ use App\Models\LogbookWeek;
 use App\Models\StudentProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
@@ -33,8 +34,39 @@ class AdminController extends Controller
         $submittedWeeks = LogbookWeek::whereIn('status', ['submitted', 'approved', 'rejected'])->count();
         $pendingWeeks = LogbookWeek::where('status', 'submitted')->count();
 
-        $activeStudents = StudentProfile::whereNotNull('organization_name')->count();
-        $inactiveStudents = max($totalStudents - $activeStudents, 0);
+        $activeStudents = User::role('student')->where('is_active', true)->count();
+        $inactiveStudents = User::role('student')->where('is_active', false)->count();
+
+        $departmentDistribution = StudentProfile::select('department', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('department')
+            ->groupBy('department')
+            ->orderByDesc('total')
+            ->get();
+
+        $levelDistribution = StudentProfile::select('level', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('level')
+            ->groupBy('level')
+            ->orderBy('level')
+            ->get();
+
+        $supervisorWorkload = User::role('supervisor')
+            ->get()
+            ->map(function ($supervisor) {
+                $assignedStudents = StudentProfile::where('supervisor_id', $supervisor->id)->count();
+
+                $pendingReviews = LogbookWeek::whereHas('user.studentProfile', function ($query) use ($supervisor) {
+                    $query->where('supervisor_id', $supervisor->id);
+                })
+                ->where('status', 'submitted')
+                ->count();
+
+                return [
+                    'name' => $supervisor->name,
+                    'assigned_students' => $assignedStudents,
+                    'pending_reviews' => $pendingReviews,
+                ];
+            })
+            ->values();
 
         return response()->json([
             'stats' => [
@@ -44,6 +76,11 @@ class AdminController extends Controller
                 'pending_reviews' => $pendingWeeks,
                 'active_students' => $activeStudents,
                 'inactive_students' => $inactiveStudents,
+            ],
+            'charts' => [
+                'department_distribution' => $departmentDistribution,
+                'level_distribution' => $levelDistribution,
+                'supervisor_workload' => $supervisorWorkload,
             ],
         ]);
     }
@@ -64,12 +101,40 @@ class AdminController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'is_active' => true,
         ]);
 
         $user->assignRole('supervisor');
 
         return response()->json([
             'message' => 'Supervisor created successfully.',
+            'user' => $user,
+        ]);
+    }
+
+    public function createAdmin(Request $request)
+    {
+        if ($response = $this->checkAdmin($request)) {
+            return $response;
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6'],
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'is_active' => true,
+        ]);
+
+        $user->assignRole('admin');
+
+        return response()->json([
+            'message' => 'Admin created successfully.',
             'user' => $user,
         ]);
     }
@@ -108,7 +173,8 @@ class AdminController extends Controller
                         'name' => $student->supervisor->name,
                         'email' => $student->supervisor->email,
                     ] : null,
-                    'is_active' => !empty($student->organization_name),
+                    'is_active' => (bool) ($student->user?->is_active ?? true),
+                    'profile_is_active' => !empty($student->organization_name),
                     'submitted_weeks_count' => $submittedCount,
                     'pending_reviews_count' => $pendingCount,
                 ];
@@ -132,21 +198,22 @@ class AdminController extends Controller
                 $assignedCount = StudentProfile::where('supervisor_id', $supervisor->id)->count();
 
                 $pendingReviews = LogbookWeek::whereHas('user.studentProfile', function ($query) use ($supervisor) {
-                        $query->where('supervisor_id', $supervisor->id);
-                    })
-                    ->where('status', 'submitted')
-                    ->count();
+                    $query->where('supervisor_id', $supervisor->id);
+                })
+                ->where('status', 'submitted')
+                ->count();
 
                 $reviewedCount = LogbookWeek::whereHas('user.studentProfile', function ($query) use ($supervisor) {
-                        $query->where('supervisor_id', $supervisor->id);
-                    })
-                    ->whereIn('status', ['approved', 'rejected'])
-                    ->count();
+                    $query->where('supervisor_id', $supervisor->id);
+                })
+                ->whereIn('status', ['approved', 'rejected'])
+                ->count();
 
                 return [
                     'id' => $supervisor->id,
                     'name' => $supervisor->name,
                     'email' => $supervisor->email,
+                    'is_active' => (bool) $supervisor->is_active,
                     'assigned_students_count' => $assignedCount,
                     'pending_reviews_count' => $pendingReviews,
                     'reviewed_weeks_count' => $reviewedCount,
@@ -160,49 +227,73 @@ class AdminController extends Controller
     }
 
     public function toggleUserStatus(Request $request, $userId)
-{
-    if ($response = $this->checkAdmin($request)) {
-        return $response;
+    {
+        if ($response = $this->checkAdmin($request)) {
+            return $response;
+        }
+
+        $user = User::findOrFail($userId);
+        $user->is_active = !$user->is_active;
+        $user->save();
+        $user->refresh();
+
+        return response()->json([
+            'message' => $user->is_active
+                ? 'User activated successfully.'
+                : 'User deactivated successfully.',
+            'user' => $user,
+        ]);
     }
 
-    $user = User::findOrFail($userId);
+    public function resetStudentProgress(Request $request, $studentId)
+    {
+        if ($response = $this->checkAdmin($request)) {
+            return $response;
+        }
 
-    $user->update([
-        'is_active' => !$user->is_active,
-    ]);
+        $student = User::findOrFail($studentId);
 
-    return response()->json([
-        'message' => $user->is_active
-            ? 'User activated successfully.'
-            : 'User deactivated successfully.',
-        'user' => $user,
-    ]);
-}
+        if (!$student->hasRole('student')) {
+            return response()->json([
+                'message' => 'Only student progress can be reset.',
+            ], 422);
+        }
 
+        $weekIds = LogbookWeek::where('user_id', $studentId)->pluck('id');
 
-public function resetStudentProgress(Request $request, $studentId)
-{
-    if ($response = $this->checkAdmin($request)) {
-        return $response;
+        DB::table('logbook_day_attachments')
+            ->whereIn('logbook_day_id', function ($query) use ($weekIds) {
+                $query->select('id')
+                    ->from('logbook_days')
+                    ->whereIn('logbook_week_id', $weekIds);
+            })
+            ->delete();
+
+        DB::table('attendance_logs')
+            ->where('user_id', $studentId)
+            ->delete();
+
+        DB::table('logbook_days')
+            ->whereIn('logbook_week_id', $weekIds)
+            ->delete();
+
+        DB::table('weekly_reports')
+            ->whereIn('logbook_week_id', $weekIds)
+            ->delete();
+
+        DB::table('ai_reviews')
+            ->where('student_id', $studentId)
+            ->delete();
+
+        DB::table('logbook_weeks')
+            ->where('user_id', $studentId)
+            ->delete();
+
+        return response()->json([
+            'message' => 'Student progress reset successfully.',
+        ]);
     }
 
-    $student = User::findOrFail($studentId);
-
-    // delete logbook data
-    \DB::table('logbook_days')->whereIn('logbook_week_id', function ($q) use ($studentId) {
-        $q->select('id')->from('logbook_weeks')->where('user_id', $studentId);
-    })->delete();
-
-    \DB::table('logbook_weeks')->where('user_id', $studentId)->delete();
-
-    \DB::table('weekly_reports')->where('student_id', $studentId)->delete();
-
-    \DB::table('attendances')->where('student_id', $studentId)->delete();
-
-    return response()->json([
-        'message' => 'Student progress reset successfully.',
-    ]);
-}
     public function assignSupervisor(Request $request)
     {
         if ($response = $this->checkAdmin($request)) {
