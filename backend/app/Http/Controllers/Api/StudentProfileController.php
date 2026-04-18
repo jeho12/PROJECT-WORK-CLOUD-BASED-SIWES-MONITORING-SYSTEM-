@@ -41,6 +41,8 @@ class StudentProfileController extends Controller
             ],
             'organization_name' => ['nullable', 'string', 'max:255'],
             'organization_address' => ['nullable', 'string', 'max:255'],
+            'organization_latitude' => ['nullable', 'numeric'],
+            'organization_longitude' => ['nullable', 'numeric'],
             'industry_supervisor_name' => ['nullable', 'string', 'max:255'],
             'industry_supervisor_email' => ['nullable', 'email', 'max:255'],
             'industry_supervisor_phone' => ['nullable', 'string', 'max:255'],

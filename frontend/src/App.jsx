@@ -12,6 +12,8 @@ import SupervisorDashboardPage from "./pages/SupervisorDashboardPage";
 import SupervisorWeekReviewPage from "./pages/SupervisorWeekReviewPage";
 import AdminPage from "./pages/AdminPage";
 import StudentOnlyRoute from "./routes/StudentOnlyRoute";
+import StudentOnlineSupervisionPage from "./pages/StudentOnlineSupervisionPage";
+
 
 function App() {
   return (
@@ -71,6 +73,17 @@ function App() {
             </RoleRoute>
           }
         />
+
+        <Route
+  path="/online-supervision"
+  element={
+    <ProfileCompletionRoute>
+      <StudentOnlyRoute>
+        <StudentOnlineSupervisionPage />
+      </StudentOnlyRoute>
+    </ProfileCompletionRoute>
+  }
+/>
 
         <Route
           path="/admin"

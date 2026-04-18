@@ -17,6 +17,8 @@ function ProfilePage() {
     school_email: "",
     organization_name: "",
     organization_address: "",
+    organization_latitude: "",
+    organization_longitude: "",
     industry_supervisor_name: "",
     industry_supervisor_email: "",
     industry_supervisor_phone: "",
@@ -30,6 +32,7 @@ function ProfilePage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [capturingLocation, setCapturingLocation] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -56,6 +59,8 @@ function ProfilePage() {
             school_email: profile.school_email || "",
             organization_name: profile.organization_name || "",
             organization_address: profile.organization_address || "",
+            organization_latitude: profile.organization_latitude || "",
+            organization_longitude: profile.organization_longitude || "",
             industry_supervisor_name: profile.industry_supervisor_name || "",
             industry_supervisor_email: profile.industry_supervisor_email || "",
             industry_supervisor_phone: profile.industry_supervisor_phone || "",
@@ -69,9 +74,7 @@ function ProfilePage() {
 
         setError("");
       } catch (err) {
-        setError(
-          err?.response?.data?.message || "Could not load profile."
-        );
+        setError(err?.response?.data?.message || "Could not load profile.");
       } finally {
         setLoading(false);
       }
@@ -95,6 +98,61 @@ function ProfilePage() {
 
     setPassport(file);
     setPassportPreview(URL.createObjectURL(file));
+  };
+
+  const reverseGeocode = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+      );
+      const data = await response.json();
+      return data.display_name || "";
+    } catch {
+      return "";
+    }
+  };
+
+  const handleCaptureOrganizationLocation = async () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported on this browser.");
+      return;
+    }
+
+    setCapturingLocation(true);
+    setError("");
+    setMessage("");
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          const address = await reverseGeocode(latitude, longitude);
+
+          setFormData((prev) => ({
+            ...prev,
+            organization_latitude: String(latitude),
+            organization_longitude: String(longitude),
+            organization_address: address || prev.organization_address,
+          }));
+
+          setMessage("Organization location captured successfully.");
+        } catch {
+          setError("Could not resolve address from your location.");
+        } finally {
+          setCapturingLocation(false);
+        }
+      },
+      () => {
+        setError("Unable to capture your location.");
+        setCapturingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -286,6 +344,47 @@ function ProfilePage() {
           name="organization_address"
           placeholder="Organization Address"
           value={formData.organization_address}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+        />
+
+        <div className="md:col-span-2">
+          <button
+            type="button"
+            onClick={handleCaptureOrganizationLocation}
+            disabled={capturingLocation}
+            className="rounded-xl px-6 py-3 font-semibold"
+            style={{
+              backgroundColor: isDark ? "#1f1630" : "#e5e4e7",
+              color: isDark ? "#fff" : "#08060d",
+            }}
+          >
+            {capturingLocation ? "Capturing Location..." : "Capture Organization Location"}
+          </button>
+        </div>
+
+        <input
+          type="text"
+          name="organization_latitude"
+          placeholder="Organization Latitude"
+          value={formData.organization_latitude}
+          onChange={handleChange}
+          className="rounded-xl px-4 py-3 outline-none"
+          style={{
+            backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+            color: isDark ? "#fff" : "#08060d",
+          }}
+        />
+
+        <input
+          type="text"
+          name="organization_longitude"
+          placeholder="Organization Longitude"
+          value={formData.organization_longitude}
           onChange={handleChange}
           className="rounded-xl px-4 py-3 outline-none"
           style={{

@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\StudentProfileController;
 use App\Http\Controllers\Api\SupervisorController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AIReviewController;
+use App\Http\Controllers\Api\OnlineSupervisionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,6 +79,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/user/{userId}/toggle-status', [AdminController::class, 'toggleUserStatus']);
         Route::post('/student/{studentId}/reset', [AdminController::class, 'resetStudentProgress']);
     });
+
+     /*
+    |--------------------------------------------------------------------------
+    | ONLINE SUPERVISION
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('online-supervision')->group(function () {
+    Route::get('/supervisor', [OnlineSupervisionController::class, 'supervisorSessions']);
+    Route::get('/student', [OnlineSupervisionController::class, 'studentSessions']);
+    Route::post('/schedule', [OnlineSupervisionController::class, 'schedule']);
+    Route::post('/join/{id}', [OnlineSupervisionController::class, 'join']);
+});
+
+
+
+
+
 
     /*
     |--------------------------------------------------------------------------

@@ -18,13 +18,19 @@ function AppLayout({ title, subtitle, children }) {
   const roles = user?.roles?.map((role) => role.name || role) || [];
 
   const navItems = roles.includes("admin")
-    ? [{ name: "Admin Panel", path: "/admin" }]
+    ? [
+        { name: "Admin Panel", path: "/admin" },
+      ]
     : roles.includes("supervisor")
-    ? [{ name: "Supervisor Dashboard", path: "/supervisor/dashboard" }]
+    ? [
+        { name: "Supervisor Dashboard", path: "/supervisor/dashboard" },
+        { name: "Online Supervision", path: "/online-supervision" },
+      ]
     : [
         { name: "Dashboard", path: "/dashboard" },
         { name: "Profile", path: "/profile" },
         { name: "Logbook", path: "/logbook" },
+        { name: "Online Supervision", path: "/online-supervision" },
       ];
 
   return (
@@ -101,10 +107,7 @@ function AppLayout({ title, subtitle, children }) {
                 <button
                   onClick={toggleTheme}
                   className="rounded-xl px-4 py-3 font-semibold"
-                  style={{
-                    backgroundColor: "#aa3bff",
-                    color: "#fff",
-                  }}
+                  style={{ backgroundColor: "#aa3bff", color: "#fff" }}
                 >
                   {isDark ? "Light Mode" : "Dark Mode"}
                 </button>

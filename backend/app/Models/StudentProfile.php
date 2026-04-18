@@ -19,6 +19,8 @@ class StudentProfile extends Model
     'school_email',
     'organization_name',
     'organization_address',
+    'organization_latitude',
+    'organization_longitude',
     'industry_supervisor_name',
     'industry_supervisor_email',
     'industry_supervisor_phone',

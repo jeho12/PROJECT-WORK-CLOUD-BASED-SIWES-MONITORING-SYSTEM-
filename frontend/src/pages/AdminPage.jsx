@@ -367,6 +367,56 @@ function AdminPage() {
           </div>
         </div>
 
+
+        {/* SUPERVISORS */}
+        <div
+  className="rounded-2xl p-6"
+  style={{ backgroundColor: isDark ? "#1a1426" : "#f7f7f7" }}
+>
+  <h3 className="font-semibold text-xl mb-4">Supervisor Monitoring</h3>
+
+  {supervisors.length === 0 ? (
+    <p className="opacity-70">No supervisors found.</p>
+  ) : (
+    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {supervisors.map((supervisor) => (
+        <div
+          key={supervisor.id}
+          className="rounded-xl p-4"
+          style={{ backgroundColor: isDark ? "#120d1d" : "#fff" }}
+        >
+          <h4 className="font-semibold">{supervisor.name}</h4>
+          <p className="text-sm opacity-80">{supervisor.email}</p>
+
+          <div className="mt-3 text-sm opacity-80 space-y-1">
+            <p>Assigned Students: {supervisor.assigned_students_count}</p>
+            <p>Pending Reviews: {supervisor.pending_reviews_count}</p>
+            <p>Reviewed Weeks: {supervisor.reviewed_weeks_count}</p>
+            <p>Status: {supervisor.is_active ? "Active" : "Inactive"}</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => toggleUser(supervisor.id)}
+            disabled={togglingUserId === supervisor.id}
+            className="mt-4 rounded-xl px-4 py-2 font-semibold w-full"
+            style={{
+              backgroundColor: supervisor.is_active ? "#ef4444" : "#22c55e",
+              color: "#fff",
+            }}
+          >
+            {togglingUserId === supervisor.id
+              ? "Updating..."
+              : supervisor.is_active
+              ? "Deactivate"
+              : "Activate"}
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
         {/* Create accounts */}
         <div className="grid xl:grid-cols-2 gap-6">
           <div className="rounded-2xl p-6" style={{ backgroundColor: isDark ? "#1a1426" : "#f7f7f7" }}>
