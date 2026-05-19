@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -36,7 +36,7 @@ function SupervisorDashboardPage() {
     [token]
   );
 
-  const fetchSupervisorDashboard = async () => {
+  const fetchSupervisorDashboard = useCallback(async () => {
     try {
       setError("");
 
@@ -54,9 +54,9 @@ function SupervisorDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authHeaders]);
 
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try {
       const res = await api.get("/online-supervision/supervisor", {
         headers: authHeaders,
@@ -66,14 +66,14 @@ function SupervisorDashboardPage() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [authHeaders]);
 
   useEffect(() => {
     if (token) {
       fetchSupervisorDashboard();
       fetchSessions();
     }
-  }, [token]);
+  }, [fetchSessions, fetchSupervisorDashboard, token]);
 
   const handleScheduleSession = async (e) => {
     e.preventDefault();
@@ -179,6 +179,25 @@ function SupervisorDashboardPage() {
       item.status === "submitted"
   );
 
+  const panelStyle = {
+    backgroundColor: isDark ? "#1a1426" : "#f7f7f7",
+    border: `1px solid ${isDark ? "#2a203a" : "#e5e4e7"}`,
+  };
+
+  const fieldStyle = {
+    backgroundColor: isDark ? "#120d1d" : "#ffffff",
+    color: isDark ? "#ffffff" : "#08060d",
+    border: `1px solid ${isDark ? "#2a203a" : "#d8d5dd"}`,
+  };
+
+  const mutedTextStyle = {
+    color: isDark ? "rgba(255,255,255,0.72)" : "rgba(8,6,13,0.68)",
+  };
+
+  const accentTextStyle = {
+    color: isDark ? "#c084fc" : "#7c1fd1",
+  };
+
   if (loading) {
     return (
       <div
@@ -197,37 +216,49 @@ function SupervisorDashboardPage() {
     <AppLayout title="Supervisor" subtitle={`Welcome, ${user?.name}`}>
       <div className="space-y-6">
         {message && (
-          <div className="bg-green-500/20 p-3 rounded-xl text-green-300">
+          <div
+            className="p-3 rounded-xl"
+            style={{
+              backgroundColor: isDark ? "rgba(34,197,94,0.18)" : "#dcfce7",
+              color: isDark ? "#86efac" : "#166534",
+            }}
+          >
             {message}
           </div>
         )}
 
         {error && (
-          <div className="bg-red-500/20 p-3 rounded-xl text-red-300">
+          <div
+            className="p-3 rounded-xl"
+            style={{
+              backgroundColor: isDark ? "rgba(239,68,68,0.18)" : "#fee2e2",
+              color: isDark ? "#fca5a5" : "#991b1b",
+            }}
+          >
             {error}
           </div>
         )}
 
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="p-5 rounded-xl bg-[#1a1426]">
-            <p>Assigned Students</p>
+          <div className="p-5 rounded-xl" style={panelStyle}>
+            <p style={mutedTextStyle}>Assigned Students</p>
             <h2 className="text-2xl font-bold">{data.students.length}</h2>
           </div>
 
-          <div className="p-5 rounded-xl bg-[#1a1426]">
-            <p>Submitted Weeks</p>
+          <div className="p-5 rounded-xl" style={panelStyle}>
+            <p style={mutedTextStyle}>Submitted Weeks</p>
             <h2 className="text-2xl font-bold">
               {data.submitted_weeks.length}
             </h2>
           </div>
 
-          <div className="p-5 rounded-xl bg-[#1a1426]">
-            <p>Pending Reviews</p>
+          <div className="p-5 rounded-xl" style={panelStyle}>
+            <p style={mutedTextStyle}>Pending Reviews</p>
             <h2 className="text-2xl font-bold">{pendingReviews.length}</h2>
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-[#1a1426]">
+        <div className="p-6 rounded-2xl" style={panelStyle}>
           <h3 className="text-xl font-semibold mb-4">
             Schedule Online Supervision
           </h3>
@@ -244,7 +275,8 @@ function SupervisorDashboardPage() {
                   student_id: e.target.value,
                 }))
               }
-              className="p-3 rounded-xl bg-[#120d1d]"
+              className="p-3 rounded-xl"
+              style={fieldStyle}
               required
             >
               <option value="">Select Student</option>
@@ -264,7 +296,8 @@ function SupervisorDashboardPage() {
                   title: e.target.value,
                 }))
               }
-              className="p-3 rounded-xl bg-[#120d1d]"
+              className="p-3 rounded-xl"
+              style={fieldStyle}
               required
             />
 
@@ -277,7 +310,8 @@ function SupervisorDashboardPage() {
                   scheduled_at: e.target.value,
                 }))
               }
-              className="p-3 rounded-xl bg-[#120d1d]"
+              className="p-3 rounded-xl"
+              style={fieldStyle}
               required
             />
 
@@ -292,7 +326,8 @@ function SupervisorDashboardPage() {
                   duration_minutes: e.target.value,
                 }))
               }
-              className="p-3 rounded-xl bg-[#120d1d]"
+              className="p-3 rounded-xl"
+              style={fieldStyle}
               required
             />
 
@@ -305,39 +340,43 @@ function SupervisorDashboardPage() {
                   description: e.target.value,
                 }))
               }
-              className="md:col-span-2 p-3 rounded-xl bg-[#120d1d]"
+              className="md:col-span-2 p-3 rounded-xl"
+              style={fieldStyle}
               rows={4}
             />
 
             <button
               type="submit"
               disabled={scheduling}
-              className="md:col-span-2 bg-purple-600 p-3 rounded-xl font-semibold"
+              className="md:col-span-2 p-3 rounded-xl font-semibold"
+              style={{ backgroundColor: "#aa3bff", color: "#ffffff" }}
             >
               {scheduling ? "Scheduling..." : "Schedule"}
             </button>
           </form>
         </div>
 
-        <div className="p-6 rounded-2xl bg-[#1a1426]">
+        <div className="p-6 rounded-2xl" style={panelStyle}>
           <h3 className="text-xl font-semibold mb-4">Scheduled Sessions</h3>
 
           {sessions.length === 0 ? (
-            <p>No sessions yet</p>
+            <p style={mutedTextStyle}>No sessions yet</p>
           ) : (
             <div className="space-y-4">
               {sessions.map((s) => (
-                <div key={s.id} className="p-4 bg-[#120d1d] rounded-xl">
+                <div key={s.id} className="p-4 rounded-xl" style={fieldStyle}>
                   <h4 className="font-semibold">{s.title}</h4>
-                  <p className="text-sm">Student: {s.student?.name}</p>
-                  <p className="text-sm">
+                  <p className="text-sm" style={mutedTextStyle}>
+                    Student: {s.student?.name}
+                  </p>
+                  <p className="text-sm" style={mutedTextStyle}>
                     {new Date(s.scheduled_at).toLocaleString()}
                   </p>
-                  <p className="text-sm opacity-80">
+                  <p className="text-sm" style={mutedTextStyle}>
                     Starts in: {getCountdown(s.scheduled_at)}
                   </p>
-                  <p className="text-sm">
-                    Status: <span className="text-purple-400">{s.status}</span>
+                  <p className="text-sm" style={mutedTextStyle}>
+                    Status: <span style={accentTextStyle}>{s.status}</span>
                   </p>
 
                   <div className="mt-3 flex gap-3 flex-wrap">
@@ -355,7 +394,11 @@ function SupervisorDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleCopyLink(s.join_url)}
-                      className="px-4 py-2 rounded-xl bg-gray-700 text-white font-semibold"
+                      className="px-4 py-2 rounded-xl font-semibold"
+                      style={{
+                        backgroundColor: isDark ? "#374151" : "#e5e4e7",
+                        color: isDark ? "#ffffff" : "#08060d",
+                      }}
                     >
                       Copy Link
                     </button>
